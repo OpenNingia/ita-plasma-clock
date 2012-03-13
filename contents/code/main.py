@@ -27,18 +27,18 @@ DIECIEMEZZA
 """
 
 HOURS = [
-"DODICI",
-"UNA",
-"DUE",
-"TRE",
-"QUATTRO",
-"CINQUE",
-"SEI",
-"SETTE",
-"OTTO",
-"NOVE"
-"DIECI"
-"UNDICI"
+u"DODICI",
+u"UNA",
+u"DUE",
+u"TRE",
+u"QUATTRO",
+u"CINQUE",
+u"SEI",
+u"SETTE",
+u"OTTO",
+u"NOVE",
+u"DIECI",
+u"UNDICI"
 ]
 
 APP_NAME    = 'ItaPlasmaClock'
@@ -50,40 +50,42 @@ def gimme_time():
     now   = datetime.now()
 
     tell_hour = now.hour
-    if now.minute >= 40:
+    if now.minute >= 35:
         tell_hour += 1
 
     tell_hour = tell_hour % 12
 
     if tell_hour == 1:
-        toks.append('È ĹUNA')
+        toks.append(u'È ĹUNA')
     else:
-        toks.append('SONO LE ORE {0}'.format(HOURS[tell_hour]))
+        toks.append(u'SONO LE ORE {0}'.format(HOURS[tell_hour]))
 
-    if now.minute >= 40:
-        toks.append('MENO')
+    if now.minute >= 35:
+        toks.append(u'MENO')
         if now.minute >= 55:
-            toks.append('CINQUE')
+            toks.append(u'CINQUE')
         elif now.minute >= 50:
-            toks.append('DIECI')
+            toks.append(u'DIECI')
         elif now.minute >= 45:
-            toks.append('UN QUARTO')
+            toks.append(u'UN QUARTO')
+        elif now.minute >= 40:
+            toks.append(u'VENTI')
         else:
-            toks.append('VENTI')
+            toks.append(u'VENTICINQUE')
     elif now.minute > 5:
-        toks.append('E')
+        toks.append(u'E')
         if now.minute < 10:
-            toks.append('CINQUE')
+            toks.append(u'CINQUE')
         elif now.minute < 15:
-            toks.append('DIECI')
+            toks.append(u'DIECI')
         elif now.minute < 20:
-            toks.append('UN QUARTO')
+            toks.append(u'UN QUARTO')
         elif now.minute < 30:
-            toks.append('VENTI')
+            toks.append(u'VENTI')
         elif now.minute < 40:
-            toks.append('MEZZA')
+            toks.append(u'MEZZA')
 
-    return ' '.join(toks)
+    return u' '.join(toks)
 
 
 class ItaPlasmaClock(plasmascript.Applet):
@@ -108,13 +110,14 @@ class ItaPlasmaClock(plasmascript.Applet):
         # read configuration
         config = self.config()
         font_nm = config.readEntry('tx_font_nm', "").toString()
-        font_sz = config.readEntry('tx_font_sz', 16).toInt()[0]
+        font_sz = config.readEntry('tx_font_sz', 14).toInt()[0]
         self.tx_font = QFont(font_nm, font_sz)
 
         r = config.readEntry('bg_color_r', 0xA8).toInt()[0]
         g = config.readEntry('bg_color_g', 0xD1).toInt()[0]
         b = config.readEntry('bg_color_b', 0x1D).toInt()[0]
-        self.bg_color = QBrush(QColor(r, g, b, 200))
+        a = config.readEntry('bg_color_a', 200).toInt()[0]
+        self.bg_color = QBrush(QColor(r, g, b, a))
 
         w = font_sz * 21 + 40
         h = font_sz * 17 + 80
@@ -167,21 +170,23 @@ class ItaPlasmaClock(plasmascript.Applet):
                     painter.setPen(self.highl_pen)
                 else:
                     painter.setPen(self.normal_pen)
-                painter.drawText(left, top, st)
+                if st == u'Ĺ':
+                    painter.drawText(left, top, u"L'")
+                else:
+                    painter.drawText(left, top, st)
                 left += self.tx_font.pointSize()*2
             idx += 1
 
         painter.restore()
 
     def createConfigurationInterface(self, parent):
-        print('createConfigurationInterface')
         widget = QWidget(parent)
         vbox = QVBoxLayout(widget)
 
         grp_1 = QGroupBox("Font", widget)
         h1    = QHBoxLayout(grp_1)
         self.lb_font = QLabel(str(parent.font()), widget)
-        self.bt_font = QPushButton("Change...", widget)
+        self.bt_font = QPushButton("Cambia...", widget)
         h1.addWidget(self.lb_font)
         h1.addSpacing(50)
         h1.addWidget(self.bt_font)
@@ -189,24 +194,37 @@ class ItaPlasmaClock(plasmascript.Applet):
         grp_2 = QGroupBox("Background Color", widget)
         h2    = QHBoxLayout(grp_2)
         self.lb_bgcol = QLabel("", widget)
-        self.bt_bgcol = QPushButton("Change...", widget)
+        self.bt_bgcol = QPushButton("Cambia...", widget)
         h2.addWidget(self.lb_bgcol)
         h2.addSpacing(50)
         h2.addWidget(self.bt_bgcol)
-
         self.lb_bgcol.setMinimumSize(QSize(48, 24))
 
-        self.update_color_label()
-        self.update_font_label ()
+        grp_3 = QGroupBox("Opacita'", widget)
+        h3    = QHBoxLayout(grp_3)
+        self.sl_alpha = QSlider(Qt.Horizontal, widget)
+        self.sl_alpha.setMinimum(0)
+        self.sl_alpha.setMaximum(255)
+        h3.addWidget(self.sl_alpha)
+
+        self.update_color_label ()
+        self.update_font_label  ()
+        self.update_alpha_slider()
 
         vbox.addWidget(grp_1)
         vbox.addWidget(grp_2)
+        vbox.addWidget(grp_3)
 
         self.connect(self.bt_font , SIGNAL('clicked()'), self.on_font_select   )
         self.connect(self.bt_bgcol, SIGNAL('clicked()'), self.on_bgcolor_select)
+        self.connect(self.sl_alpha, SIGNAL('valueChanged(int)'), self.on_alpha_changed)
         self.connect(parent, SIGNAL("accepted()"), self.save_config)
 
-        parent.addPage(widget, "Ita Plasma Clock", "MyIcon");
+        # free widget
+        self.connect(parent, SIGNAL("accepted()"), widget.deleteLater)
+        self.connect(parent, SIGNAL("rejected()"), widget.deleteLater)
+
+        parent.addPage(widget, "Orologio Italiano", "clock");
         return widget
 
     def update_color_label(self):
@@ -220,6 +238,10 @@ class ItaPlasmaClock(plasmascript.Applet):
         fnt_info = QFontInfo(self.tx_font)
         self.lb_font.setFont(self.tx_font)
         self.lb_font.setText(fnt_info.family())
+
+    def update_alpha_slider(self):
+        a = self.bg_color.color().alpha()
+        self.sl_alpha.setValue(a)
 
     def update_size(self):
         font_sz = self.tx_font.pointSize()
@@ -240,16 +262,24 @@ class ItaPlasmaClock(plasmascript.Applet):
         col_dlg.setCurrentColor(self.bg_color.color())
         if col_dlg.exec_() == 1:
             col = col_dlg.selectedColor()
-            col.setAlpha(200)
+            col.setAlpha(self.sl_alpha.value())
             self.bg_color = QBrush(col)
             self.update_color_label()
+
+    def on_alpha_changed(self, val):
+        col = self.bg_color.color()
+        col.setAlpha(self.sl_alpha.value())
+        self.bg_color = QBrush(col)
 
     def save_config(self):
         config = self.config()
         fnt_info = QFontInfo(self.tx_font)
         config.writeEntry('tx_font_nm', fnt_info.family())
         config.writeEntry('tx_font_sz', fnt_info.pointSize())
-        config.writeEntry('bg_color'  , self.bg_color.color())
+        config.writeEntry('bg_color_r', self.bg_color.color().red())
+        config.writeEntry('bg_color_g', self.bg_color.color().green())
+        config.writeEntry('bg_color_b', self.bg_color.color().blue())
+        config.writeEntry('bg_color_a', self.bg_color.color().alpha())
         self.update()
 
 def CreateApplet(parent):

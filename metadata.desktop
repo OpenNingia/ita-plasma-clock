@@ -1,18 +1,18 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=ItaPlasmaClock
-Name[it]=Orologio Italiano
-Name[it_IT]=Orologio Italiano
-Name[en]=Italian Word Clock
-Name[en_US]=Italian Word Clock
+Name=PlasmaQlock
+Name[it]=Orologio Scritto
+Name[it_IT]=Orologio Scritto
+Name[en]=Words Clock
+Name[en_US]=Words Clock
 Type=Service
 ServiceTypes=Plasma/Applet
 Icon=clock
 X-Plasma-API=python
 X-Plasma-MainScript=code/main.py
-X-KDE-PluginInfo-Author=Daniele "OpenNingia" Simonetti
+X-KDE-PluginInfo-Author=Daniele "OpenNingia" Simonetti (modded by Federico Rampazzo)
 X-KDE-PluginInfo-Email=oppifjellet@gmail.com
-X-KDE-PluginInfo-Name=ita-plasma-clock
+X-KDE-PluginInfo-Name=plasma-qlock
 X-KDE-PluginInfo-Version=1.6
 X-KDE-PluginInfo-Website=https://github.com/OpenNingia
 X-KDE-PluginInfo-Category=Utility

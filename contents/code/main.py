@@ -1,6 +1,7 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 # Copyright Daniele Simonetti 2012
+# Modded by Federico Rampazzo
 
 from PyQt4.QtGui   import *
 from PyQt4.QtCore  import *

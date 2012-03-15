@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 # Copyright Daniele Simonetti 2012
 
@@ -60,18 +60,18 @@ u"DIECI",
 u"UNDICI"
 ],
 [
-"TWELVE",
-"ONE",
-"TWO",
-"THREE",
-"FOUR",
-"FIVE",
-"SIX",
-"SEVEN",
-"EIGHT",
-"NINE"
-"TEN"
-"ELEVEN"
+u"TWELVE",
+u"ONE",
+u"TWO",
+u"THREE",
+u"FOUR",
+u"FIVE",
+u"SIX",
+u"SEVEN",
+u"EIGHT",
+u"NINE",
+u"TEN",
+u"ELEVEN"
 ]
 ]
 
@@ -128,35 +128,35 @@ def gimme_time_en():
 	tell_hour = tell_hour % 12
 
 	if tell_hour == 1:
-		toks.append('IT IS ONE OCLOCK')
+		toks.append(u'IT IS ONE OCLOCK')
 	else:
-		toks.append('IT IS ')
+		toks.append(u'IT IS ')
 		if now.minute >= 40: 
 			if now.minute >= 55:
-				toks.append('FIVE')
+				toks.append(u'FIVE')
 			elif now.minute >= 50:
-				toks.append('TEN')
+				toks.append(u'TEN')
 			elif now.minute >= 45:
-				toks.append('A QUARTER')
+				toks.append(u'A QUARTER')
 			else:
-				toks.append('TWENTY')
-			toks.append(' TO ')
+				toks.append(u'TWENTY')
+			toks.append(u' TO ')
 		elif now.minute >= 5:
 			if now.minute < 10:
-				toks.append('FIVE')
+				toks.append(u'FIVE')
 			elif now.minute < 15:
-				toks.append('TEN')
+				toks.append(u'TEN')
 			elif now.minute < 20:
-				toks.append('A QUARTER')
+				toks.append(u'A QUARTER')
 			elif now.minute < 30:
-				toks.append('TWENTY')
+				toks.append(u'TWENTY')
 			elif now.minute < 40:
-				toks.append('HALF')
-			toks.append(' PAST ')
+				toks.append(u'HALF')
+			toks.append(u' PAST ')
 		toks.append(HOURS[1][tell_hour])
 		if now.minute <= 5:
-			toks.append(' OCLOCK')
-	return ' '.join(toks)
+			toks.append(u' OCLOCK')
+	return u' '.join(toks)
 	
 FUNCS = [ gimme_time_it, gimme_time_en]
 

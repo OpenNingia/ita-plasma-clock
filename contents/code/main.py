@@ -1,11 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 # Copyright Daniele Simonetti 2012
 
 from PyQt4.QtGui   import *
 from PyQt4.QtCore  import *
 from PyKDE4.plasma import Plasma
-from PyKDE4 import plasmascript
+from PyKDE4        import plasmascript
 
 import sys
 import os
@@ -43,7 +43,7 @@ u"UNDICI"
 
 APP_NAME    = 'ItaPlasmaClock'
 APP_ORG     = 'openningia'
-APP_VERSION = '1.0'
+APP_VERSION = '1.6'
 
 def gimme_time():
     toks  = []
@@ -280,6 +280,7 @@ class ItaPlasmaClock(plasmascript.Applet):
         config.writeEntry('bg_color_g', self.bg_color.color().green())
         config.writeEntry('bg_color_b', self.bg_color.color().blue())
         config.writeEntry('bg_color_a', self.bg_color.color().alpha())
+        config.sync()
         self.update()
 
 def CreateApplet(parent):

@@ -376,9 +376,8 @@ class PlasmaQlock(plasmascript.Applet):
 		config.writeEntry('bg_color_b', self.bg_color.color().blue())
 		config.writeEntry('bg_color_a', self.bg_color.color().alpha())
 		config.writeEntry('language'  , self.bt_lang.currentIndex())
-        config.sync()
-		self.update()
->>>>>>> 111f13510b4d694211de24b2cc07b4abc226b859
+    	config.sync()
+    	self.update()
 
 def CreateApplet(parent):
 	return PlasmaQlock(parent)

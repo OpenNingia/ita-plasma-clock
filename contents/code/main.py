@@ -247,7 +247,7 @@ def gimme_minute():
     now = datetime.now()
     return now.minute
 
-FUNCS = [ gimme_time_it, gimme_time_en, gimme_time_de, gimme_minute ]
+FUNCS = [ gimme_time_it, gimme_time_en, gimme_time_de]
 
 class PlasmaQlock(plasmascript.Applet):
     def __init__(self,parent,args=None):
@@ -261,10 +261,10 @@ class PlasmaQlock(plasmascript.Applet):
         self.bg_color = QBrush(
                         QColor(0xA8, 0xD1, 0x1D, 200))
         self.normal_pen = QPen()
-        self.normal_pen.setColor(QColor(0x29,0x29,0x29))
+        self.normal_pen.setColor(QColor(0x99,0x99,0x99))
         self.highl_pen  = QPen()
         self.highl_pen.setColor(QColor(255,255,255))
-        self.language = 2
+        self.language = 0
 
     def init(self):
         self.setHasConfigurationInterface(True)
@@ -272,17 +272,17 @@ class PlasmaQlock(plasmascript.Applet):
 
         # read configuration
         config = self.config()
-        font_nm = config.readEntry('tx_font_nm', "Droid Sans").toString()
+        font_nm = config.readEntry('tx_font_nm', "").toString()
         font_sz = config.readEntry('tx_font_sz', 14).toInt()[0]
         self.tx_font = QFont(font_nm, font_sz)
 
-        r = config.readEntry('bg_color_r', 0x00).toInt()[0]
-        g = config.readEntry('bg_color_g', 0x00).toInt()[0]
-        b = config.readEntry('bg_color_b', 0x00).toInt()[0]
+        r = config.readEntry('bg_color_r', 0xA8).toInt()[0]
+        g = config.readEntry('bg_color_g', 0xD1).toInt()[0]
+        b = config.readEntry('bg_color_b', 0x1D).toInt()[0]
         a = config.readEntry('bg_color_a', 200).toInt()[0]
         self.bg_color = QBrush(QColor(r, g, b, a))
 
-        self.language = config.readEntry('language', 2).toInt()[0]
+        self.language = config.readEntry('language', 0).toInt()[0]
 
         self.update_clock()
 
@@ -306,7 +306,7 @@ class PlasmaQlock(plasmascript.Applet):
         self.old_to_render = self.to_render
         self.to_render     = []
         self.old_minute = self.minute
-        self.minute = FUNCS[3]() % 10
+        self.minute = gimme_minute() % 10
         idx = 0
         off = 0
         for t in toks:
@@ -331,39 +331,39 @@ class PlasmaQlock(plasmascript.Applet):
         w = size.width()
         h = size.height()
         if self.minute == 0 or self.minute == 5:
-	  painter.setPen(self.normal_pen)
-	  painter.drawText(30, 40, u"•")
-	  painter.drawText(w-40, 40, u"•")
-	  painter.drawText(30, h-30, u"•")
-	  painter.drawText(w-40, h-30, u"•")
-	elif self.minute == 1 or self.minute == 6:
-	  painter.setPen(self.highl_pen)
-	  painter.drawText(30, 40, u"•")
-	  painter.setPen(self.normal_pen)
-	  painter.drawText(w-40, 40, u"•")
-	  painter.drawText(30, h-30, u"•")
-	  painter.drawText(w-40, h-30, u"•")
-	elif self.minute == 2 or self.minute == 7:
-	  painter.setPen(self.highl_pen)
-	  painter.drawText(30, 40, u"•")
-	  painter.drawText(w-40, 40, u"•")
-	  painter.setPen(self.normal_pen)
-	  painter.drawText(30, h-30, u"•")
-	  painter.drawText(w-40, h-30, u"•")
-	elif self.minute == 3 or self.minute == 8:
-	  painter.setPen(self.highl_pen)
-	  painter.drawText(30, 40, u"•")
-	  painter.drawText(w-40, 40, u"•")
-	  painter.drawText(30, h-30, u"•")
-	  painter.setPen(self.normal_pen)
-	  painter.drawText(w-40, h-30, u"•")
-	elif self.minute == 4 or self.minute == 9:
-	  painter.setPen(self.highl_pen)
-	  painter.drawText(30, 40, u"•")
-	  painter.drawText(w-40, 40, u"•")
-	  painter.drawText(30, h-30, u"•")
-	  painter.drawText(w-40, h-30, u"•")
-	
+          painter.setPen(self.normal_pen)
+          painter.drawText(30, 40, u"•")
+          painter.drawText(w-40, 40, u"•")
+          painter.drawText(30, h-30, u"•")
+          painter.drawText(w-40, h-30, u"•")
+        elif self.minute == 1 or self.minute == 6:
+          painter.setPen(self.highl_pen)
+          painter.drawText(30, 40, u"•")
+          painter.setPen(self.normal_pen)
+          painter.drawText(w-40, 40, u"•")
+          painter.drawText(30, h-30, u"•")
+          painter.drawText(w-40, h-30, u"•")
+        elif self.minute == 2 or self.minute == 7:
+          painter.setPen(self.highl_pen)
+          painter.drawText(30, 40, u"•")
+          painter.drawText(w-40, 40, u"•")
+          painter.setPen(self.normal_pen)
+          painter.drawText(30, h-30, u"•")
+          painter.drawText(w-40, h-30, u"•")
+        elif self.minute == 3 or self.minute == 8:
+          painter.setPen(self.highl_pen)
+          painter.drawText(30, 40, u"•")
+          painter.drawText(w-40, 40, u"•")
+          painter.drawText(30, h-30, u"•")
+          painter.setPen(self.normal_pen)
+          painter.drawText(w-40, h-30, u"•")
+        elif self.minute == 4 or self.minute == 9:
+          painter.setPen(self.highl_pen)
+          painter.drawText(30, 40, u"•")
+          painter.drawText(w-40, 40, u"•")
+          painter.drawText(30, h-30, u"•")
+          painter.drawText(w-40, h-30, u"•")
+
 
         # DRAW THE BASE
         top  = 80
@@ -468,8 +468,8 @@ class PlasmaQlock(plasmascript.Applet):
 
     def update_size(self):
         font_sz = self.tx_font.pointSize()
-        w = font_sz * 21 + 40
-        h = font_sz * 17 + 80
+        w = font_sz * 21 + 160
+        h = font_sz * 17 + 160
         self.resize(w, h)
 
     def on_font_select(self):

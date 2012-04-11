@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright Daniele Simonetti 2012
 # Modded by Federico Rampazzo
+# Modded by Dennis Kadioglu: 
+#	- added german matrix and hours
+#	- added minutes represented by 4 dots in the corners
+#	- german text changes every 5 minutes
+#	- default settings changed to german and black background
+#	- changed color for normal pen to darker grey tone for better differentiation
 
 from PyQt4.QtGui   import *
 from PyQt4.QtCore  import *
@@ -42,6 +48,19 @@ FOURFIVETWO
 EIGHTELEVEN
 SEVENTWELVE
 TENSEOCLOCK
+    """,
+    
+    u"""\
+ESKISTAFÜNF
+ZEHNZWANZIG
+DREIVIERTEL
+VORFUNKNACH
+HALBAELFÜNF
+EINSXÄMZWEI
+DREIAUJVIER
+SECHSNLACHT
+SIEBENZWÖLF
+ZEHNEUNKUHR
     """
 ]
 
@@ -74,6 +93,21 @@ HOURS = [
     u"NINE",
     u"TEN",
     u"ELEVEN"
+    ],
+    
+    [
+    u"ZWÖLF",
+    u"EINS",
+    u"ZWEI",
+    u"DREI",
+    u"VIER",
+    u"FÜNF",
+    u"SECHS",
+    u"SIEBEN",
+    u"ACHT",
+    u"NEUN",
+    u"ZEHN",
+    u"ELF"
     ]
 ]
 
@@ -159,8 +193,61 @@ def gimme_time_en():
         if now.minute <= 5:
             toks.append(u' OCLOCK')
     return u' '.join(toks)
+    
+def gimme_time_de():
+    toks  = []
+    now   = datetime.now()
 
-FUNCS = [ gimme_time_it, gimme_time_en]
+    tell_hour = now.hour
+    if now.minute >= 25:
+        tell_hour += 1
+
+    tell_hour = tell_hour % 12
+
+    if now.minute < 5:
+        toks.append(u'ES IST')
+        toks.append(HOURS[2][tell_hour])
+        toks.append(u' UHR')
+    else:
+        toks.append(u'ES IST ')
+        if now.minute < 30 and now.minute >= 25:
+	  toks.append(u'FÜNF')
+	  toks.append(u'VOR')
+	  toks.append(u'HALB')
+	elif now.minute >= 35 and now.minute < 40:
+	  toks.append(u'FÜNF')
+	  toks.append(u'NACH')
+	  toks.append(u'HALB')
+	elif now.minute >= 30 and now.minute < 35:
+	  toks.append(u'HALB')
+        elif now.minute >= 40:
+            if now.minute >= 55:
+                toks.append(u'FÜNF')
+            elif now.minute >= 50:
+                toks.append(u'ZEHN')
+            elif now.minute >= 45:
+                toks.append(u'VIERTEL')
+            else:
+                toks.append(u'ZWANZIG')
+            toks.append(u' VOR ')
+        elif now.minute >= 5:
+            if now.minute < 10:
+                toks.append(u'FÜNF')
+            elif now.minute < 15:
+                toks.append(u'ZEHN')
+            elif now.minute < 20:
+                toks.append(u'VIERTEL')
+            elif now.minute < 25:
+                toks.append(u'ZWANZIG')
+            toks.append(u' NACH ')
+        toks.append(HOURS[2][tell_hour])
+    return u' '.join(toks)
+    
+def gimme_minute():
+    now = datetime.now()
+    return now.minute
+
+FUNCS = [ gimme_time_it, gimme_time_en, gimme_time_de, gimme_minute ]
 
 class PlasmaQlock(plasmascript.Applet):
     def __init__(self,parent,args=None):
@@ -168,14 +255,16 @@ class PlasmaQlock(plasmascript.Applet):
 
         self.to_render     = []
         self.old_to_render = []
+        self.minute = 0
+        self.old_minute = 0
 
         self.bg_color = QBrush(
                         QColor(0xA8, 0xD1, 0x1D, 200))
         self.normal_pen = QPen()
-        self.normal_pen.setColor(QColor(0x99,0x99,0x99))
+        self.normal_pen.setColor(QColor(0x29,0x29,0x29))
         self.highl_pen  = QPen()
         self.highl_pen.setColor(QColor(255,255,255))
-        self.language = 0
+        self.language = 2
 
     def init(self):
         self.setHasConfigurationInterface(True)
@@ -183,22 +272,22 @@ class PlasmaQlock(plasmascript.Applet):
 
         # read configuration
         config = self.config()
-        font_nm = config.readEntry('tx_font_nm', "").toString()
+        font_nm = config.readEntry('tx_font_nm', "Droid Sans").toString()
         font_sz = config.readEntry('tx_font_sz', 14).toInt()[0]
         self.tx_font = QFont(font_nm, font_sz)
 
-        r = config.readEntry('bg_color_r', 0xA8).toInt()[0]
-        g = config.readEntry('bg_color_g', 0xD1).toInt()[0]
-        b = config.readEntry('bg_color_b', 0x1D).toInt()[0]
+        r = config.readEntry('bg_color_r', 0x00).toInt()[0]
+        g = config.readEntry('bg_color_g', 0x00).toInt()[0]
+        b = config.readEntry('bg_color_b', 0x00).toInt()[0]
         a = config.readEntry('bg_color_a', 200).toInt()[0]
         self.bg_color = QBrush(QColor(r, g, b, a))
 
-        self.language = config.readEntry('language', 0).toInt()[0]
+        self.language = config.readEntry('language', 2).toInt()[0]
 
         self.update_clock()
 
-        w = font_sz * 21 + 40
-        h = font_sz * 17 + 80
+        w = font_sz * 21 + 160
+        h = font_sz * 17 + 160
         self.resize(w, h)
 
         # create timer
@@ -209,13 +298,15 @@ class PlasmaQlock(plasmascript.Applet):
 
     def on_timeout(self):
         self.update_clock()
-        if self.old_to_render != self.to_render:
+        if self.old_to_render != self.to_render or self.old_minute != self.minute:
             self.update()
 
     def update_clock(self):
         toks = FUNCS[self.language]().split()
         self.old_to_render = self.to_render
         self.to_render     = []
+        self.old_minute = self.minute
+        self.minute = FUNCS[3]() % 10
         idx = 0
         off = 0
         for t in toks:
@@ -225,7 +316,6 @@ class PlasmaQlock(plasmascript.Applet):
             for i in xrange(idx, idx+len(t)):
                 self.to_render.append( i )
             off = idx + len(t) + 1
-        print self.to_render
 
     def paintInterface(self, painter, option, rect):
         painter.save()
@@ -234,15 +324,55 @@ class PlasmaQlock(plasmascript.Applet):
         painter.setPen(self.normal_pen)
         painter.fillRect(rect, self.bg_color)
         painter.setFont(self.tx_font)
+        
+        # DRAW THE MINUTES
+        #self.minute = FUNCS[3]() % 10
+        size = self.size()
+        w = size.width()
+        h = size.height()
+        if self.minute == 0 or self.minute == 5:
+	  painter.setPen(self.normal_pen)
+	  painter.drawText(30, 40, u"•")
+	  painter.drawText(w-40, 40, u"•")
+	  painter.drawText(30, h-30, u"•")
+	  painter.drawText(w-40, h-30, u"•")
+	elif self.minute == 1 or self.minute == 6:
+	  painter.setPen(self.highl_pen)
+	  painter.drawText(30, 40, u"•")
+	  painter.setPen(self.normal_pen)
+	  painter.drawText(w-40, 40, u"•")
+	  painter.drawText(30, h-30, u"•")
+	  painter.drawText(w-40, h-30, u"•")
+	elif self.minute == 2 or self.minute == 7:
+	  painter.setPen(self.highl_pen)
+	  painter.drawText(30, 40, u"•")
+	  painter.drawText(w-40, 40, u"•")
+	  painter.setPen(self.normal_pen)
+	  painter.drawText(30, h-30, u"•")
+	  painter.drawText(w-40, h-30, u"•")
+	elif self.minute == 3 or self.minute == 8:
+	  painter.setPen(self.highl_pen)
+	  painter.drawText(30, 40, u"•")
+	  painter.drawText(w-40, 40, u"•")
+	  painter.drawText(30, h-30, u"•")
+	  painter.setPen(self.normal_pen)
+	  painter.drawText(w-40, h-30, u"•")
+	elif self.minute == 4 or self.minute == 9:
+	  painter.setPen(self.highl_pen)
+	  painter.drawText(30, 40, u"•")
+	  painter.drawText(w-40, 40, u"•")
+	  painter.drawText(30, h-30, u"•")
+	  painter.drawText(w-40, h-30, u"•")
+	
 
         # DRAW THE BASE
-        top  = 40
-        left = 20
+        top  = 80
+        left = 80
         idx  = 0
         for st in MATRIX[self.language]:
             if st == '\n':
                 top += self.tx_font.pointSize()*2
-                left = 20
+                left = 80
             else:
                 if idx in self.to_render:
                     painter.setPen(self.highl_pen)
@@ -290,6 +420,7 @@ class PlasmaQlock(plasmascript.Applet):
         self.bt_lang = QComboBox(widget)
         self.bt_lang.insertItem(0, "Italian");
         self.bt_lang.insertItem(1, "English");
+        self.bt_lang.insertItem(2, "German");
         self.bt_lang.setCurrentIndex(self.language);
         h3.addWidget(self.bt_lang)
 

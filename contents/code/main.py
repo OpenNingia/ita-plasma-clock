@@ -205,22 +205,22 @@ def gimme_time_de():
     if now.minute < 5:
         toks.append(u'ES IST')
         if tell_hour == 1:
-	  toks.append(u'EIN')  
+            toks.append(u'EIN')  
         else:
-	  toks.append(HOURS[2][tell_hour])
+            toks.append(HOURS[2][tell_hour])
         toks.append(u' UHR')
     else:
         toks.append(u'ES IST ')
         if now.minute < 30 and now.minute >= 25:
-	  toks.append(u'FÜNF')
-	  toks.append(u'VOR')
-	  toks.append(u'HALB')
-	elif now.minute >= 35 and now.minute < 40:
-	  toks.append(u'FÜNF')
-	  toks.append(u'NACH')
-	  toks.append(u'HALB')
-	elif now.minute >= 30 and now.minute < 35:
-	  toks.append(u'HALB')
+          toks.append(u'FÜNF')
+          toks.append(u'VOR')
+          toks.append(u'HALB')
+        elif now.minute >= 35 and now.minute < 40:
+          toks.append(u'FÜNF')
+          toks.append(u'NACH')
+          toks.append(u'HALB')
+        elif now.minute >= 30 and now.minute < 35:
+          toks.append(u'HALB')
         elif now.minute >= 40:
             if now.minute >= 55:
                 toks.append(u'FÜNF')

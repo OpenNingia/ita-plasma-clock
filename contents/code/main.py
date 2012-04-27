@@ -6,8 +6,6 @@
 #	- added german matrix and hours
 #	- added minutes represented by 4 dots in the corners
 #	- german text changes every 5 minutes
-#	- default settings changed to german and black background
-#	- changed color for normal pen to darker grey tone for better differentiation
 
 from PyQt4.QtGui   import *
 from PyQt4.QtCore  import *

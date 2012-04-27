@@ -206,7 +206,10 @@ def gimme_time_de():
 
     if now.minute < 5:
         toks.append(u'ES IST')
-        toks.append(HOURS[2][tell_hour])
+        if tell_hour == 1:
+	  toks.append(u'EIN')  
+        else:
+	  toks.append(HOURS[2][tell_hour])
         toks.append(u' UHR')
     else:
         toks.append(u'ES IST ')
